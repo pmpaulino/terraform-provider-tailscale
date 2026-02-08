@@ -1,0 +1,12 @@
+# Copy this to ~/.terraformrc (or %APPDATA%\terraform.rc on Windows)
+# so Terraform uses your local provider build instead of the registry.
+#
+# Replace the path with your repo root (the directory that contains
+# the terraform-provider-tailscale binary after "make build").
+
+provider_installation {
+  dev_overrides {
+    "tailscale/tailscale" = "/path/to/terraform-provider-tailscale"
+  }
+  direct {}
+}
