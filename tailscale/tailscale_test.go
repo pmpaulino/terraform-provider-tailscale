@@ -26,8 +26,10 @@ type TestServer struct {
 	Path   string
 	Body   *bytes.Buffer
 
-	ResponseCode int
-	ResponseBody interface{}
+	ResponseCode      int
+	ResponseBody      interface{}
+	ResponseByPath    map[string]interface{}   // optional: response body per method+path or path
+	ResponseQueueByPath map[string][]interface{} // optional: per method+path, pop first element per request (so same path can return different bodies in sequence)
 }
 
 func NewTestHarness(t *testing.T) (*tailscale.Client, *TestServer) {
@@ -76,12 +78,33 @@ func (t *TestServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_, err := io.Copy(t.Body, r.Body)
 	assert.NoError(t.t, err)
 
+	key := r.Method + " " + r.URL.Path
+	var body interface{}
+	if t.ResponseQueueByPath != nil {
+		if q, ok := t.ResponseQueueByPath[key]; ok && len(q) > 0 {
+			body = q[0]
+			t.ResponseQueueByPath[key] = q[1:]
+		}
+	}
+	if body == nil && t.ResponseByPath != nil {
+		if b, ok := t.ResponseByPath[key]; ok {
+			body = b
+		} else if b, ok := t.ResponseByPath[r.URL.Path]; ok {
+			body = b
+		}
+	}
+	if body == nil {
+		body = t.ResponseBody
+	}
 	w.WriteHeader(t.ResponseCode)
-	switch body := t.ResponseBody.(type) {
+	switch b := body.(type) {
+	case nil:
+		// no body
 	case []byte:
-		_, err := w.Write(body)
+		_, err := w.Write(b)
 		assert.NoError(t.t, err)
 	default:
-		assert.NoError(t.t, json.NewEncoder(w).Encode(body))
+		assert.NoError(t.t, json.NewEncoder(w).Encode(b))
 	}
 }
+
