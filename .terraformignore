@@ -1,0 +1,14 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform.lock.hcl
+
+# Local/secret
+*.secret.yaml
+secrets/
+.kube/
+kubeconfig*
+*.key
+*.crt
