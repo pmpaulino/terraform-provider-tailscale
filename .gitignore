@@ -1,3 +1,20 @@
 dist/
 terraform-provider-tailscale
 .idea/**
+
+# Go
+*.exe
+*.test
+vendor/
+*.out
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Universal
+.DS_Store
+*.tmp
+*.swp
