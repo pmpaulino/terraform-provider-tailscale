@@ -14,6 +14,10 @@ vendor/
 *.tfstate.*
 .terraform.lock.hcl
 
+# Tooling / IDE
+.cursor/
+.specify/
+
 # Universal
 .DS_Store
 *.tmp
